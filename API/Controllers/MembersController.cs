@@ -10,7 +10,7 @@ namespace API.Controllers
     [ApiController]
     public class MembersController(AppDbContext context) : ControllerBase
     {
-        [HttpGet]
+        [HttpGet]        
         // public ActionResult<IReadOnlyList<AppUser>> GetMembers()
         // {
         //     var members = context.Users.ToList();

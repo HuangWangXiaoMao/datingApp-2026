@@ -1,6 +1,9 @@
 using API.Data;
 using API.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Cors.Infrastructure;
+
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,22 +14,32 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
-
+builder.Services.AddCors();
+// builder.Services.AddCors(options =>
+// {
+//     options.AddPolicy("FrontendPolicy", policy =>
+//     {
+//         policy.WithOrigins("http://localhost:4200", "https://localhost:4200")
+//         .AllowAnyHeader()
+//         .AllowAnyMethod()
+//         .AllowCredentials();
+//     });
+// });
 var app = builder.Build();
+app.UseCors( x => x.AllowAnyHeader().AllowAnyMethod().AllowCredentials()
+    .WithOrigins("http://localhost:4200", "https://localhost:4200"));
+//app.UseCors(o => o.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().WithExposedHeaders("*"));
+
+
+
+//app.UseRouting();
+//app.UseCors("FrontendPolicy");
+app.UseCors();
+//app.UseAuthorization();
 
 app.MapControllers();
 
-
 app.Run();
 
-//dotnet dev-certs https -h
-//dotnet tool list -g 
-//dotnet tool list -g dotnet-ef
-//dotnet ef
-//dotnet ef migrations -h
-//dotnet ef migrations add InitialCreate -o Data/Migrations
-//dotnet ef migrations remove
-//dotnet tool update -g dotnet-ef --version 10.0.14
-//dotnet ef database update
-//dotnet watch
-//dotnet new gitignore
+
+

@@ -1,3 +1,4 @@
 {
-    "dotnet.defaultSolution": "DatingApp.slnx"
+    "dotnet.defaultSolution": "DatingApp.slnx",
+    "editor.defaultFormatter": "rvest.vs-code-prettier-eslint"
 }
