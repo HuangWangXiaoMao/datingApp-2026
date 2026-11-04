@@ -2,6 +2,10 @@ using API.Data;
 using API.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Cors.Infrastructure;
+using API.Interfaces;
+using API.Services;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 
 
@@ -25,6 +29,19 @@ builder.Services.AddCors();
 //         .AllowCredentials();
 //     });
 // });
+builder.Services.AddScoped<ITokenServices, TokenServices>();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        var tokenkey = builder.Configuration["TokenKey"]?? throw new InvalidOperationException("TokenKey is not configured.");
+        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+        {            
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(tokenkey)),
+            ValidateIssuer = false,
+            ValidateAudience = false
+        };
+    });
 var app = builder.Build();
 app.UseCors( x => x.AllowAnyHeader().AllowAnyMethod().AllowCredentials()
     .WithOrigins("http://localhost:4200", "https://localhost:4200"));
@@ -35,7 +52,8 @@ app.UseCors( x => x.AllowAnyHeader().AllowAnyMethod().AllowCredentials()
 //app.UseRouting();
 //app.UseCors("FrontendPolicy");
 app.UseCors();
-//app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
