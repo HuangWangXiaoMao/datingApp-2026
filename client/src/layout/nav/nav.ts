@@ -1,3 +1,4 @@
+import { BusyService } from './../../core/services/busy-service';
 import { themes } from './../theme';
 import { AccountService } from './../../core/services/account-service';
 import { Component, inject, OnInit, signal } from '@angular/core';
@@ -14,6 +15,7 @@ import { ToastService } from '../../core/services/toast-service';
 })
 export class Nav implements OnInit{
   protected accountService= inject(AccountService);
+  protected busyService = inject(BusyService)
   protected router=inject(Router);
   private toast=inject(ToastService);
   protected creds: any={};
