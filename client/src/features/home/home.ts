@@ -10,7 +10,7 @@ import { Register } from '../account/register/register';
   templateUrl: './home.html',
 })
 export class Home {
-  
+
   protected registerMode = signal(false);
   accountService = new AccountService();
   showRegister(value:boolean) {
