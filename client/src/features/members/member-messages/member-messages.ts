@@ -1,9 +1,78 @@
-import { Component } from '@angular/core';
+import { Messages } from './../../messages/messages';
+import { TimeAgoPipe } from './../../../core/pipes/time-ago-pipe';
+import { Component, effect, ElementRef, inject, model, OnDestroy, OnInit, signal, ViewChild } from '@angular/core';
+import { MessageService } from '../../../core/services/message-service';
+import { MemberService } from '../../../core/services/member-service';
+import { Message } from '../../../types/message';
+import { DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
-  imports: [],
+  imports: [DatePipe,TimeAgoPipe,FormsModule],
   selector: 'app-member-messages',
   styleUrl: './member-messages.css',
   templateUrl: './member-messages.html',
 })
-export class MemberMessages {}
+export class MemberMessages  implements OnInit, OnDestroy {
+  @ViewChild('messageEndRef') messageEndRef!: ElementRef;
+  protected messageService = inject(MessageService);
+  private memberService = inject(MemberService);
+  protected messages = signal<Message[]>([]);
+  protected messageContent = '';
+
+  constructor() {
+    effect(() => {
+      const currentMessages = this.messages();
+      if (currentMessages.length > 0) {
+        this.scrollToBottom();
+      }
+    })
+  }
+
+  ngOnInit(): void {
+    this.loadMessages();
+  }
+
+  loadMessages() {
+    const memberId = this.memberService.member()?.id;
+    if(memberId){
+      this.messageService.getMessageThread(memberId).subscribe({
+        next:messages =>this.messages.set(messages.map(message=>({
+          ...message,
+          currentUserSender:message.senderId ! == memberId
+        })))
+      })
+    }
+  }
+
+  sendMessage() {
+    const recipientId = this.memberService.member()?.id;
+    if (!recipientId ) return;
+    this.messageService.sendMessage(recipientId, this.messageContent).subscribe({
+      next:message =>{
+        this.messages.update(messages =>{
+          message.currentUserSender = true;
+          return [...messages,message]
+        });
+        this.messageContent ='';
+      }
+    })
+  }
+
+
+
+  ngOnDestroy(): void {
+    throw new Error('Method not implemented.');
+  }
+
+  scrollToBottom() {
+    setTimeout(() => {
+      if (this.messageEndRef) {
+        this.messageEndRef.nativeElement.scrollIntoView({ behavior: 'smooth' })
+      }
+    })
+  }
+
+  
+
+}
